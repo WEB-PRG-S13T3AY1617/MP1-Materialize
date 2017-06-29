@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link type="text/css" rel="stylesheet" href="materialize/css/materialize.min.css"  media="screen,projection"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script type="text/javascript" src="materialize/js/materialize.min.js"></script>
+        <script>
+            $(document).ready(function(){
+                var root = "https://jsonplaceholder.typicode.com";
+                var n = (window.location.search).slice(3);
+                var getPhotos = $.ajax({url: root + "/photos", data:{albumId:n}, method: 'GET'});
+                
+                getPhotos.then(function(data){
+                	$.each(data, function(i, item){
+                        var newDiv = document.createElement('div');
+                        var newA = document.createElement('a');
+                        var newImg = document.createElement('img');
+
+                        var newModal = document.createElement('div');
+                        var newModalContent = document.createElement('div');
+                        var newModalContent2 = document.createElement('div');
+                        var newModalFooter = document.createElement('div');
+
+                        newModal.className = 'modal';
+                        newModal.id = 'modal' + item.id;
+
+                        newModalContent.className = 'modal-content col s8 grey darken-4 center-align';
+                        $(newModalContent).html("<img src='" + item.url + "'>");
+
+                        newModalContent2.className = 'modal-content col s4';
+                        $(newModalContent2).html("<div><a class='modal-action modal-close grey-text'><i class='material-icons right'>close</i></a></div>");
+
+                        $.ajax({url: root + "/albums", data:{id:item.albumId}, method: 'GET'}).then(function(data2){
+                            $.ajax({url: root + "/users", data:{id:data2[0].userId}, method: 'GET'}).then(function(data3){
+                                $(newModalContent2).append("<h5><a class='blue-text text-darken-2' href='userPage.html?n=" + 
+                                                            data2[0].userId + "'>" + data3[0].username + "</a></h5><div class='divider'></div>");
+                                $(newModalContent2).append("<h4>" + item.title + "</h4>");
+                                $(newModalContent2).append("in album <a class='blue-text text-darken-2' href='Photo_Album.html?n=" + 
+                                                            data2[0].id + "'>" + data2[0].title + "</a>");
+                                $('#title').html("<i class='material-icons'>bubble_chart</i>" + data2[0].title).attr('href', 'Photo_Album.html?n=' + data[0].id);
+                            });
+                        });
+
+                        newDiv.className = 'col s2';
+                        newA.href = '#modal' + item.id;
+                        newImg.src = item.thumbnailUrl;
+
+                        $(newModal).append(newModalContent);
+                        $(newModal).append(newModalContent2);
+                        $('#modalrow').append(newModal);
+
+                        $(newA).append(newImg);
+                        $(newDiv).append(newA);
+                        $('#photosdiv').append(newDiv);
+                        $('.modal').modal({startingTop:'1%',endingTop:'2%'});
+                    });
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <div class="navbar-fixed">
+            <nav class="blue accent-3">
+                <div class="nav-wrapper">
+                    <div style="margin-left: 2%">
+                        <a id="title" class="brand-logo left"></a>
+                    </div>
+                    <ul class="right">
+                        <li>
+                            <a class="tooltipped" data-delay="50" data-tooltip="Home" href="index.html">
+                                <i class="material-icons left">home</i>
+                                Home
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+        <div class="container col s12">
+            <div id="photosdiv" class="center-align row">
+            </div>
+        </div>
+        <div id="modalrow" class="row"></div>
+    </body>
+</html>

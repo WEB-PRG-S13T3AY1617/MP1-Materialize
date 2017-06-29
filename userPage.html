@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link type="text/css" rel="stylesheet" href="materialize/css/materialize.min.css"  media="screen,projection"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script type="text/javascript" src="materialize/js/materialize.min.js"></script>
+        <script>
+            $(document).ready(function(){
+                $('.firsthide').hide();
+                var root = "https://jsonplaceholder.typicode.com";
+                var n = (window.location.search).slice(3);
+                var getUsers = $.ajax({url: root + "/users", data:{id:n}, method: 'GET'});
+                var getPosts = $.ajax({url: root + "/posts", data:{userId:n}, method: 'GET'});
+                var getAlbums = $.ajax({url: root + "/albums", data:{userId:n}, method: 'GET'});
+                
+                getUsers.then(function(data){
+                    $('#thediv').remove();
+                    $('.firsthide').show();
+                    var details = '<h5>ID</h5>' + data[0].id + "<div class='divider'></div>" + 
+                                  '<h5>Username</h5>' + data[0].username + "<div class='divider'></div>" + 
+                                  '<h5>Email</h5>' + data[0].email + "<div class='divider'></div>" +
+                                  '<h5>Address</h5>' + data[0].address.street + ' ' + data[0].address.suite + ' ' + data[0].address.city + ' ' + data[0].address.zipcode + "<iframe width='100%' height='250px' frameborder='0' scrolling='no' src='https://maps.google.com/maps?q=" + data[0].address.geo.lat + ',' + data[0].address.geo.lng + "&hl=es;z=14&amp;output=embed'></iframe>" + "<div class='divider'></div>" + 
+                                  '<h5>Phone</h5>' + data[0].phone + "<div class='divider'></div>" + 
+                                  "<h5>Website</h5><a href='http://" + data[0].website + "'>" + data[0].website + "</a><div class='divider'></div>" + 
+                                  '<h5>Company</h5>' + data[0].company.name + ' "' + data[0].company.catchPhrase + '" (' + data[0].company.bs + ')';
+                    $('#title').html("<i class='material-icons'>bubble_chart</i>" + data[0].name).attr('href', 'userPage.html?n=' + data[0].id);
+                    document.title = data[0].name;
+                    $('#detailid').append(details);
+                });
+                
+                $('#loadbtn').click(function(){
+                    getPosts.then(function(data){
+                        $.each(data, function(i, item){
+                            if (i >= 5){
+                                var newCardDiv = document.createElement('div');
+                                newCardDiv.className = "card-panel flow-text";
+
+                                $.ajax({url: root + "/users", data:{id:item.userId}, method: 'GET'}).then(function(data2){
+                                    $(newCardDiv).html('<h4>' + item.title + '</h4>' + 
+                                                       item.body + "<div class='divider'></div>Posted by <a class='blue-text text-darken-2' href='userPage.html?n=" + 
+                                                       item.userId + "'>" + data2[0].username + '</a>');
+                                });
+                                $('#postsdiv').append(newCardDiv);
+                            }
+                        });
+                    });
+                    $('#loadbtn').remove();
+                });
+                
+                getPosts.then(function(data){
+			   		$.each(data.reverse(), function(i, item){
+                        if (i < 5){
+                            var newCardDiv = document.createElement('div');
+                            newCardDiv.className = "card-panel flow-text";
+
+                            $.ajax({url: root + "/users", data:{id:item.userId}, method: 'GET'}).then(function(data2){
+                                $(newCardDiv).html('<h4>' + item.title + '</h4>' + 
+                                                   item.body + "<div class='divider'></div>Posted by <a class='blue-text text-darken-2' href='userPage.html?n=" + 
+                                                   item.userId + "'>" + data2[0].username + '</a>');
+                            });
+                            $('#postsdiv').append(newCardDiv);
+                        }
+                    });
+                });
+                
+                $('#loadbtn2').click(function(){
+                    getAlbums.then(function(data){
+                        $.each(data, function(i, item){
+                            if (i >= 5){
+                                $.ajax({url: root + "/photos", data:{albumId:item.id}, method: 'GET'}).then(function(data2){
+                                    var newCardContainer = document.createElement('div');
+                                    newCardContainer.className = 'col s3';
+                                    var newCard = document.createElement('div');
+                                    newCard.className = 'card small';
+                                    var newCardImage = document.createElement('div');
+                                    newCardImage.className = 'card-image';
+                                    var newImg = document.createElement('img');
+                                    newImg.src = data2[0].thumbnailUrl;
+                                    var newCardContent = document.createElement('div');
+                                    newCardContent.className = 'card-content';
+
+                                    $(newCardContent).append("<a class='black-text' href='Photo_Album.html?n=" + item.id + "'>" + item.title + "</a>");
+                                    $(newCardImage).append(newImg);
+                                    $(newCard).append(newCardImage).append(newCardContent);
+                                    $(newCardContainer).append(newCard);
+                                    $('#albumcards').append(newCardContainer);
+                                });
+                            }
+                        });
+                    });
+                    $('#loadbtn2').remove();
+                });
+                
+                getAlbums.then(function(data){
+                    $.each(data.reverse(), function(i, item){
+                        if (i < 5){
+                            $.ajax({url: root + "/photos", data:{albumId:item.id}, method: 'GET'}).then(function(data2){
+                                var newCardContainer = document.createElement('div');
+                                newCardContainer.className = 'col s3';
+                                var newCard = document.createElement('div');
+                                newCard.className = 'card small';
+                                var newCardImage = document.createElement('div');
+                                newCardImage.className = 'card-image';
+                                var newImg = document.createElement('img');
+                                newImg.src = data2[0].thumbnailUrl;
+                                var newCardContent = document.createElement('div');
+                                newCardContent.className = 'card-content';
+
+                                $(newCardContent).append("<a class='black-text' href='Photo_Album.html?n=" + item.id + "'>" + item.title + "</a>");
+                                $(newCardImage).append(newImg);
+                                $(newCard).append(newCardImage).append(newCardContent);
+                                $(newCardContainer).append(newCard);
+                                $('#albumcards').append(newCardContainer);
+                            });
+                        }
+                    });
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <div class="navbar-fixed">
+            <nav class="blue accent-3">
+                <div class="nav-wrapper">
+                    <div style="margin-left: 2%">
+                        <a id="title" class="brand-logo left"></a>
+                    </div>
+                    <ul class="right">
+                        <li>
+                            <a class="tooltipped" data-delay="50" data-tooltip="Home" href="index.html">
+                            <i class="material-icons left">home</i>
+                            Home
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+        <div class="row">
+            <div id="detailid" class="col s3"></div>
+            <div id="thediv" class="card-panel">
+                <div id="loading" class="center-align">
+                    <div class="preloader-wrapper small active">
+                        <div class="spinner-layer spinner-blue-only">
+                            <div class="circle-clipper left">
+                                <div class="circle"></div>
+                            </div>
+                            <div class="gap-patch">
+                                <div class="circle"></div>
+                            </div>
+                            <div class="circle-clipper right">
+                                <div class="circle"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container col s9">
+                <div class="firsthide flow-text">Posts</div>
+                <div id="postscontainer" class="row">
+                    <div id="postsdiv" class="col s12"></div>
+                    <div class="center-align">
+                        <button id="loadbtn" class="firsthide waves-effect waves-light btn flow-text blue col s12">Load More<i class=" material-icons right">keyboard_arrow_down</i></button>
+                    </div>
+                </div>
+                <div class="firsthide flow-text">Photo Albums</div>
+                <div id="photosdiv" class="row">
+                    <div id="albumcards" class="col s12"></div>
+                    <div class="center-align">
+                        <button id="loadbtn2" class="firsthide waves-effect waves-light btn flow-text blue col s12">Load More<i class=" material-icons right">keyboard_arrow_down</i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
